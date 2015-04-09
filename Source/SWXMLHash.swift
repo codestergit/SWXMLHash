@@ -78,7 +78,7 @@ class XMLParser : NSObject, NSXMLParserDelegate {
         return XMLIndexer(root)
     }
 
-    func parser(parser: NSXMLParser!, didStartElement elementName: String!, namespaceURI: String!, qualifiedName: String!, attributes attributeDict: NSDictionary!) {
+    func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [NSObject: AnyObject]) {
 
         self.parsingElement = elementName
 
@@ -88,13 +88,15 @@ class XMLParser : NSObject, NSXMLParserDelegate {
         lastResults = ""
     }
 
-    func parser(parser: NSXMLParser!, foundCharacters string: String!) {
-        if parsingElement == currentNode.name {
-            lastResults += string.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+    func parser(parser: NSXMLParser, foundCharacters string: String?) {
+        if let string = string {
+            if parsingElement == currentNode.name {
+                lastResults += string.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+            }
         }
     }
 
-    func parser(parser: NSXMLParser!, didEndElement elementName: String!, namespaceURI: String!, qualifiedName qName: String!) {
+    func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
         parsingElement = elementName
 
         if !lastResults.isEmpty {
@@ -380,9 +382,11 @@ public class XMLElement {
         }
 
         for (keyAny,valueAny) in attributes {
-            let key = keyAny as String
-            let value = valueAny as String
-            element.attributes[key] = value
+            if let key = keyAny as? String {
+                if let value = valueAny as? String {
+                    element.attributes[key] = value
+                }
+            }
         }
 
         return element
